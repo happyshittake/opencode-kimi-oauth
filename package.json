@@ -1,5 +1,5 @@
 {
-  "name": "opencode-kimi-oauth",
+  "name": "kimi-oauth",
   "version": "0.1.0",
   "description": "OpenCode plugin for Kimi for Coding OAuth login and model discovery",
   "type": "module",
