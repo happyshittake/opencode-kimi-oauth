@@ -1,0 +1,6 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "kimi-oauth@git+https://github.com/happyshittake/opencode-kimi-oauth.git"
+  ]
+}

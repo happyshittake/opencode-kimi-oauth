@@ -3,16 +3,35 @@
   "version": "0.1.0",
   "description": "OpenCode plugin for Kimi for Coding OAuth login and model discovery",
   "type": "module",
-  "main": "plugin.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./plugin.js",
-      "types": "./plugin.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [
-    "plugin.js",
-    "plugin.d.ts"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.4.7",
+    "@opencode-ai/sdk": "^1.4.7",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.4.7",
+    "@opencode-ai/sdk": "^1.4.7"
+  }
 }

@@ -1,6 +1,5 @@
 import type { Plugin, PluginModule, PluginInput, PluginOptions, Hooks } from "@opencode-ai/plugin";
 import { createAuthHook } from "./auth.js";
-import { createProviderHook } from "./provider.js";
 import { TokenStore, getDefaultStoreDir } from "./token-store.js";
 
 export const id = "kimi-oauth";
@@ -11,11 +10,9 @@ export const server: Plugin = async (
 ): Promise<Hooks> => {
   const store = new TokenStore(getDefaultStoreDir());
   const authHook = createAuthHook(store);
-  const providerHook = createProviderHook();
 
   return {
     auth: authHook,
-    provider: providerHook,
   };
 };
 
