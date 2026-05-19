@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "OpenCode plugin for Kimi for Coding OAuth login and model discovery",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "plugin.js",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./plugin.js",
+      "types": "./plugin.d.ts"
     }
   },
   "scripts": {
