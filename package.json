@@ -1,0 +1,38 @@
+{
+  "name": "opencode-kimi-oauth",
+  "version": "0.1.0",
+  "description": "OpenCode plugin for Kimi for Coding OAuth login and model discovery",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.4.0",
+    "@opencode-ai/sdk": ">=1.4.0"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.4.7",
+    "@opencode-ai/sdk": "^1.4.7",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/happyshittake/opencode-kimi-oauth.git"
+  },
+  "license": "MIT"
+}
