@@ -2,10 +2,14 @@
 import os from "os";
 var CLIENT_ID = "17e5f671-d194-4dfb-9706-5516cb48c098";
 var DEFAULT_OAUTH_HOST = "https://auth.kimi.com";
+var DEFAULT_API_BASE_URL = "https://api.kimi.com/coding/v1";
 var PROVIDER_ID = "kimi-coding-oauth";
 var KIMI_CLI_VERSION = "1.44.0";
 function getOAuthHost() {
   return process.env.KIMI_CODE_OAUTH_HOST || process.env.KIMI_OAUTH_HOST || DEFAULT_OAUTH_HOST;
+}
+function getApiBaseUrl() {
+  return process.env.KIMI_CODE_BASE_URL || DEFAULT_API_BASE_URL;
 }
 function getDeviceModel() {
   const platform = os.platform();
@@ -197,6 +201,93 @@ function createAuthHook(store) {
   };
 }
 
+// src/provider.ts
+var DEFAULT_OUTPUT_LIMIT = 16384;
+function transformModel(raw) {
+  return {
+    id: raw.id,
+    providerID: PROVIDER_ID,
+    api: {
+      id: raw.id,
+      url: getApiBaseUrl(),
+      npm: "opencode-kimi-oauth"
+    },
+    name: raw.display_name || raw.id,
+    capabilities: {
+      reasoning: raw.supports_reasoning,
+      toolcall: true,
+      temperature: true,
+      attachment: raw.supports_image_in || raw.supports_video_in,
+      input: {
+        text: true,
+        audio: false,
+        image: raw.supports_image_in,
+        video: raw.supports_video_in,
+        pdf: false
+      },
+      output: {
+        text: true,
+        audio: false,
+        image: false,
+        video: false,
+        pdf: false
+      },
+      interleaved: false
+    },
+    cost: {
+      input: 0,
+      output: 0,
+      cache: { read: 0, write: 0 }
+    },
+    limit: {
+      context: raw.context_length,
+      output: DEFAULT_OUTPUT_LIMIT
+    },
+    status: "active",
+    options: {},
+    headers: {
+      "User-Agent": `KimiCLI/${KIMI_CLI_VERSION}`
+    },
+    release_date: ""
+  };
+}
+function createProviderHook() {
+  return {
+    id: PROVIDER_ID,
+    models: async (_provider, ctx) => {
+      if (!ctx.auth || ctx.auth.type !== "oauth") {
+        return {};
+      }
+      const accessToken = ctx.auth.access;
+      try {
+        const url = `${getApiBaseUrl()}/models`;
+        const resp = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "User-Agent": `KimiCLI/${KIMI_CLI_VERSION}`,
+            "X-Msh-Platform": "kimi_cli"
+          }
+        });
+        if (!resp.ok) {
+          return {};
+        }
+        const data = await resp.json();
+        if (!data?.data || !Array.isArray(data.data)) {
+          return {};
+        }
+        const models = {};
+        for (const raw of data.data) {
+          models[raw.id] = transformModel(raw);
+        }
+        return models;
+      } catch (err) {
+        console.error("[kimi-oauth] provider models() error:", err);
+        return {};
+      }
+    }
+  };
+}
+
 // src/token-store.ts
 import fs from "fs";
 import path from "path";
@@ -283,8 +374,10 @@ var id = "kimi-oauth";
 var server = async (_input, _options) => {
   const store = new TokenStore(getDefaultStoreDir());
   const authHook = createAuthHook(store);
+  const providerHook = createProviderHook();
   return {
-    auth: authHook
+    auth: authHook,
+    provider: providerHook
   };
 };
 var index_default = { id, server };
