@@ -140,5 +140,50 @@ describe("createProviderHook", () => {
       const result = await providerHook.models!({} as any, ctx);
       expect(Object.keys(result)).toHaveLength(0);
     });
+
+    it("returns empty model map on malformed API response", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ not_data: [] }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      const ctx = {
+        auth: {
+          type: "oauth" as const,
+          refresh: "rt_test",
+          access: "at_test",
+          expires: Date.now() / 1000 + 99999,
+        },
+      };
+
+      const result = await providerHook.models!({} as any, ctx);
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+
+    it("logs error to console on fetch failure", async () => {
+      const fetchMock = vi.fn().mockRejectedValue(new Error("Network error"));
+      vi.stubGlobal("fetch", fetchMock);
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const ctx = {
+        auth: {
+          type: "oauth" as const,
+          refresh: "rt_test",
+          access: "at_test",
+          expires: Date.now() / 1000 + 99999,
+        },
+      };
+
+      const result = await providerHook.models!({} as any, ctx);
+      expect(Object.keys(result)).toHaveLength(0);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[kimi-oauth] provider models() error:",
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
+    });
   });
 });

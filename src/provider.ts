@@ -93,7 +93,12 @@ export function createProviderHook(): ProviderHook {
           return {};
         }
 
-        const data: KimiModelsResponse = await resp.json();
+        const data = await resp.json();
+
+        if (!data?.data || !Array.isArray(data.data)) {
+          return {};
+        }
+
         const models: Record<string, Model> = {};
 
         for (const raw of data.data) {
@@ -101,7 +106,8 @@ export function createProviderHook(): ProviderHook {
         }
 
         return models;
-      } catch {
+      } catch (err) {
+        console.error("[kimi-oauth] provider models() error:", err);
         return {};
       }
     },
